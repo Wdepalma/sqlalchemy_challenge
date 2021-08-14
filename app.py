@@ -34,7 +34,7 @@ def Climate_Home_Page():
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/<start><br/>"
-        f"/api/v1.0/<start>/<end><br/>"
+        f"/api/v1.0/start/end<br/>"
       )
 
 @app.route("/api/v1.0/precipitation")
@@ -82,9 +82,17 @@ def tobs():
     return jsonify(tobs_list)
 
 
-#@app.route("/api/v1.0/<start>")
-#def from_when(start):
-#    return jsonify(hello_dict)
+@app.route("/api/v1.0/<start>")
+def from_when(start):
+    session = Session(engine)
+    tobs_since = session.query(func.sum(measurement_tbl.tobs))
+    #    filter(measurement_tbl.date > start)
+
+    session.close()
+    
+
+    return (tobs_since)
+
 
 
 #@app.route("/api/v1.0/<start>/<end>")
