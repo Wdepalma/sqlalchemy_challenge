@@ -84,20 +84,26 @@ def tobs():
 
 @app.route("/api/v1.0/<start>")
 def from_when(start):
-    session = Session(engine)
-    tobs_since = session.query(func.sum(measurement_tbl.tobs))
-    #    filter(measurement_tbl.date > start)
-
-    session.close()
+    rmin=[]
     
+    session = Session(engine)
+    tobs_since = session.query(func.min(measurement_tbl.tobs)).first()
+    #    filter(measurement_tbl.date > start)
+   
+    session.close()
+    rmin.append(tobs_since)
+    print(tobs_since)
+    print(rmin)
+    return rmin
 
-    return (tobs_since)
 
 
 
-#@app.route("/api/v1.0/<start>/<end>")
-#def range(start, end):
-#    return jsonify(hello_dict)
+@app.route("/api/v1.0/<start>/<end>")
+def range(start, end):
+
+
+    return jsonify()
 
 
 if __name__ == "__main__":
