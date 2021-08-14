@@ -9,16 +9,17 @@ from flask import Flask, jsonify
 
 #Database set-up:
 
-engine = create_engine("sqlite:///hawaii.sqlite")
+engine = create_engine("sqlite:///Resources/hawaii.sqlite")
 
 # reflect an existing database into a new model
 Base = automap_base()
 # reflect the tables
 Base.prepare(engine, reflect=True)
 
+print(Base.classes.keys())
 # Save reference to the table
-station = Base.classes.station
-measurement = Base.classes.measurement
+station_tbl = Base.classes.station
+measurement_tbl = Base.classes.measurement
 
 
 app = Flask(__name__)
@@ -29,18 +30,18 @@ def Climate_Home_Page():
     return (
         f"Welcome to the Climate API!<br/>"
         f"Available Routes:<br/>"
-        f"/api/v1.0/precipitation"
-        f"/api/v1.0/stations"
-        f"/api/v1.0/tobs"
-        f"/api/v1.0/<start>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start><br/>"
+        f"/api/v1.0/<start>/<end><br/>"
       )
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
     session = Session(engine)
 
-    precips = session.query(measurement.date, measurement.prcp).all()
+    precips = session.query(measurement_tbl.date, measurement_tbl.prcp).all()
 
     session.close()
 
@@ -54,15 +55,32 @@ def precipitation():
 
     return jsonify(prcp_list)
 
+@app.route("/api/v1.0/stations")
+def stations():
+    session = Session(engine)
+    stat_list = session.query(station_tbl.station,station_tbl.name).all()
+        
+    session.close()
+    return jsonify(stat_list)
 
+@app.route("/api/v1.0/tobs")
+def tobs():
+    tobs_list=[]
+    session = Session(engine)
+    tobs_lastyear = session.query(measurement_tbl.station,measurement_tbl.date,measurement_tbl.tobs).\
+        filter(measurement_tbl.station =="USC00519281").\
+        filter(measurement_tbl.date > "2016-08-22")
 
-#@app.route("/api/v1.0/stations")
-#def stations():
-#    return jsonify(hello_dict)
+    session.close()
+    for s,d,t in tobs_lastyear:
+        temp_dict={}
+        temp_dict["station"]=s
+        temp_dict["date"] = d
+        temp_dict["tobs"] = t
+        tobs_list.append(temp_dict)
 
-#@app.route("/api/v1.0/tobs")
-#def tobs():
-#    return jsonify(hello_dict)
+    return jsonify(tobs_list)
+
 
 #@app.route("/api/v1.0/<start>")
 #def from_when(start):
